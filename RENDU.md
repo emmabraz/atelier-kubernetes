@@ -31,27 +31,31 @@
 ## Exercice 4 — Déclaratif
 
 7. Quelle différence entre `kubectl create` et `kubectl apply` ?
-   >
+   >kubectl create crée une ressource et échoue si elle existe déjà c'est impératif. kubectl apply applique un fichier YAML : il crée la ressource si elle n’existe pas, ou la met à jour si elle existe c'est déclaratif. On peut donc le relancer sans erreur.
 8. À quoi sert le `selector` d'un Service ? Que se passe-t-il s'il ne correspond à aucun pod ?
-   >
+   >Le selector permet de désigner les pods qui reçoivent le trafic, grâce à leurs labels comme ici app: site. S’il ne correspond à aucun pod, le Service n’a aucune cible : kubectl get endpoints site est vide et le site ne répond pas.
 
 ## Exercice 5 — Scaling & mises à jour
 
 9. Sur quels nœuds se trouvent vos 3 réplicas ? Collez la sortie de `kubectl get pods -l app=site -o wide`.
-   ```
-
-   ```
+   > Les réplicas se trouvent sur 3 nœuds différents k3d-lab-agent-0, k3d-lab-agent-1 et k3d-lab-server-0.
+   ```@emmabraz ➜ /workspaces/atelier-kubernetes (main) $ kubectl get pods -l app=site -o wide
+NAME                    READY   STATUS    RESTARTS   AGE     IP          NODE               NOMINATED NODE   READINESS GATES
+site-7cd5578b5d-j97br   1/1     Running   0          8m22s   10.42.1.8   k3d-lab-agent-1    <none>           <none>
+site-7cd5578b5d-kjwc4   1/1     Running   0          109s    10.42.2.5   k3d-lab-server-0   <none>           <none>
+site-7cd5578b5d-vkcht   1/1     Running   0          109s    10.42.0.7   k3d-lab-agent-0    <none>           <none>
+@emmabraz ➜ /workspaces/atelier-kubernetes (main) $ ```
 10. Avec l'image `nginx:9.99`, quel statut avait le pod ? Quelle commande vous a donné la cause ?
-    >
+    >Le nouveau pod était en ErrImagePull puis ImagePullBackOff (0/1). C’est la commande kubectl describe pod -l app=site qui m’a donné la cause : l’image nginx:9.99 reste en état Waiting, car ce tag n’existe pas et Kubernetes n’arrive pas à la télécharger.
 11. Pendant la panne, le site restait-il accessible ? Pourquoi ?
-    >
+    >Le site est resté accessible. Pendant le rolling update, Kubernetes ne supprime pas les anciens pods tant que le nouveau n’est pas prêt. Le pod nginx 9.99 n’est jamais devenu prêt donc le service a continué d’envoyer le trafic aux 3 anciens pods en nginx:1.28
 
 ## Exercice 6 — Portainer & Mario
 
 12. URL publique de votre Mario :
-    >
+    >https://refactored-spork-7vrgpwxq6prr3pgvq-8585.app.github.dev/
 13. Retrouvez le Deployment `mario` en ligne de commande. Portainer et `kubectl` parlent-ils au même composant ? Lequel ?
-    >
+    >Oui kubectl get deploy mario retrouve le Deployment créé par Portainer. Portainer et kubectl parlent au même composant qui est l’API Server de Kubernetes. Portainer n’est qu’une interface graphique qui envoie des requêtes à l’API Server, comme kubectl.
 
 ## Bonus (facultatif)
 
