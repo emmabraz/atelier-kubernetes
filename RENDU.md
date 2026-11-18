@@ -60,8 +60,11 @@ site-7cd5578b5d-vkcht   1/1     Running   0          109s    10.42.0.7   k3d-lab
 ## Bonus (facultatif)
 
 14. Bonus réalisés et remarques :
-    >
-
+    > pour le A le site reste accessible après la suppression des pods. L’Ingress ne cible pas un pod précis et il envoie le trafic vers le Service site qui redirige vers les pods disponibles. Avec le port-forward, le tunnel mourait avec son pod.
+    > pour le B, j’ai ajouté une readinessProbe HTTP sur / (port 80) ainsi que des requests et limits (CPU 50m/100m, mémoire 32Mi/64Mi) au conteneur nginx. Les 3 pods sont repartis en 1/1 Running. Avec le path /nope, le nouveau pod reste en 0/1 : nginx répond 404 (Readiness probe failed ... statuscode: 404), donc le pod n’est jamais prêt et ne reçoit aucun trafic. Le site reste accessible (200 OK) grâce aux anciens pods.
+    > pour le C, après le drain de k3d-lab-agent-0, le pod site qui s’y trouvait a été évacué et recréé sur k3d-lab-agent-1 pareil pour les pods Portainer et système. Après le uncordon par contre aucun pod n’est revenu sur agent-0. Kubernetes ne déplace pas un pod déjà en cours d’exécution et uncordon rend seulement le nœud disponible pour les prochains pods.
+    > pour le D
 ---
 
-**Score obtenu avec `./scripts/check.sh` :** ... / ...
+**Score obtenu avec `./scripts/check.sh` :**
+>Score : 18 / 18  (l'exercice 3 n'est pas vérifiable automatiquement)
